@@ -33,9 +33,29 @@ let highScore = localStorage.getItem('highScore') || 0;
 // Update high score display on load
 document.getElementById('highScore').textContent = highScore;
 
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 function startGame() {
     document.getElementById('startScreen').classList.add('hide');
     document.getElementById('gameContainer').classList.add('show');
+    
+    // Shuffle locations array
+    shuffleArray(locations);
+    
+    // Reset game state
+    currentLocation = 0;
+    score = 0;
+    correctGuesses = 0;
+    wrongGuesses = 0;
+    guessHistory = [];
+    document.getElementById('score').textContent = score;
+    
     loadLocation();
 }
 
@@ -141,6 +161,9 @@ function restartGame() {
     const endScreen = document.getElementById('endScreen');
     endScreen.classList.remove('show');
     
+    // Shuffle locations array again
+    shuffleArray(locations);
+    
     // Reset game state
     currentLocation = 0;
     score = 0;
@@ -212,28 +235,49 @@ function selectOption(option) {
     document.querySelector('.lock-in-btn').style.display = 'block';
 }
 
-function makeGuess(guess, correct) {
-    clearInterval(timerInterval);
+function showResults(guess, correct, points) {
+    const resultsScreen = document.getElementById('resultsScreen');
+    const resultIcon = document.getElementById('resultIcon');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultDetails = document.getElementById('resultDetails');
     
+    // Set icon and title based on result
     if (guess === correct) {
-        const points = calculatePoints();
-        score += points;
-        correctGuesses++;
-        showNotification(`Correct! +${points} points`);
+        resultIcon.textContent = '✓';
+        resultIcon.className = 'result-icon correct';
+        resultTitle.textContent = 'Correct!';
     } else {
-        wrongGuesses++;
-        showNotification(`Wrong! The correct answer was ${correct}`);
+        resultIcon.textContent = '✗';
+        resultIcon.className = 'result-icon wrong';
+        resultTitle.textContent = 'Wrong!';
     }
     
-    // Record guess history
-    guessHistory.push({
-        location: correct,
-        guess: guess,
-        correct: guess === correct,
-        timeLeft: timeLeft
-    });
+    // Create result details
+    resultDetails.innerHTML = `
+        <div class="result-item">
+            <span class="result-label">Your Answer</span>
+            <span class="result-value">${guess || 'No answer'}</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Correct Answer</span>
+            <span class="result-value">${correct}</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Points Earned</span>
+            <span class="result-value">${points || 0}</span>
+        </div>
+        <div class="result-item">
+            <span class="result-label">Time Remaining</span>
+            <span class="result-value">${timeLeft.toFixed(1)}s</span>
+        </div>
+    `;
     
-    document.getElementById('score').textContent = `Score: ${score}`;
+    resultsScreen.classList.add('show');
+}
+
+function nextQuestion() {
+    const resultsScreen = document.getElementById('resultsScreen');
+    resultsScreen.classList.remove('show');
     
     currentLocation++;
     if (currentLocation < locations.length) {
@@ -241,6 +285,33 @@ function makeGuess(guess, correct) {
     } else {
         showEndScreen();
     }
+}
+
+function makeGuess(guess, correct) {
+    clearInterval(timerInterval);
+    
+    let points = 0;
+    if (guess === correct) {
+        points = calculatePoints();
+        score += points;
+        correctGuesses++;
+    } else {
+        wrongGuesses++;
+    }
+    
+    // Record guess history
+    guessHistory.push({
+        location: correct,
+        guess: guess,
+        correct: guess === correct,
+        timeLeft: timeLeft,
+        points: points
+    });
+    
+    document.getElementById('score').textContent = score;
+    
+    // Show results screen instead of moving directly to next question
+    showResults(guess, correct, points);
 }
 
 // Remove the window.onload call since we now start the game with the start button  

@@ -16,6 +16,18 @@ const locations = [
         videoPath: 'Videos/Urmaker Larson.mov',
         storeName: 'Urmaker Larson',
         options: ['Bjørklund', 'Urmaker Larson', 'David-Anderson']
+    },
+    {
+        id: 4,
+        videoPath: 'Videos/Eple Huset.mov',
+        storeName: 'Eple Huset',
+        options: ['Eple Huset', 'Elkjøp', 'Power']
+    },
+    {
+        id: 5,
+        videoPath: 'Videos/Yummy Heaven.mov',
+        storeName: 'Yummy Heaven',
+        options: ['Yummy Heaven', 'Fast Candy', 'Dropsen']
     }
 ];
 
@@ -312,6 +324,27 @@ function makeGuess(guess, correct) {
     
     // Show results screen instead of moving directly to next question
     showResults(guess, correct, points);
+}
+
+function goToHome() {
+    // Clear any active timers
+    clearInterval(timerInterval);
+    
+    // Hide all screens
+    document.getElementById('gameContainer').classList.remove('show');
+    document.getElementById('resultsScreen').classList.remove('show');
+    document.getElementById('endScreen').classList.remove('show');
+    
+    // Show start screen
+    document.getElementById('startScreen').classList.remove('hide');
+    
+    // Reset game state
+    currentLocation = 0;
+    score = 0;
+    correctGuesses = 0;
+    wrongGuesses = 0;
+    guessHistory = [];
+    document.getElementById('score').textContent = score;
 }
 
 // Remove the window.onload call since we now start the game with the start button  

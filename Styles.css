@@ -510,9 +510,16 @@ h1 {
     font-family: 'Cinzel', serif; 
     display: block !important;
     visibility: visible !important;
-    width: auto;
+    width: 75%;
     max-width: 160px; /* Adjust as needed */
     height: auto;
     display: block;
+}
 
+/* Responsiv justering for mobiler */
+@media (max-width: 600px) {
+    .logo-img {
+        width: 35%;
+        max-width: 120px;
+    }
 }
